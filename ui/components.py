@@ -68,24 +68,47 @@ class UIComponents:
         parent.combobox_patient.setStyleSheet("""
             QComboBox {
                 border: 1px solid #ced4da;
-                border-radius: 4px;
-                padding: 5px 30px 5px 10px;
+                border-radius: 0px;
+                padding: 1px 18px 1px 3px;
                 background-color: white;
                 color: #1a1a1a;
                 min-width: 150px;
+                font-size: 11px;
+                combobox-popup: 0;
             }
             QComboBox::drop-down {
                 subcontrol-origin: padding;
                 subcontrol-position: top right;
-                width: 24px;
+                width: 20px;
                 border-left: 1px solid #ced4da;
+            }
+            QComboBox:on {
+                /* Keine border-radius Definition mehr nötig */
             }
             QComboBox QAbstractItemView {
                 border: 1px solid #ced4da;
                 selection-background-color: #e9ecef;
                 selection-color: #212121;
                 background-color: white;
-                font-size: 13px;
+                color: #1a1a1a;
+                font-size: 11px;
+                outline: 0;
+                padding: 0px 2px;  /* Kein Padding oben/unten, nur links/rechts */
+                margin: 0px;
+                border-radius: 0px;
+            }
+            QComboBox QAbstractItemView::item {
+                background-color: white;
+                color: #1a1a1a;
+                padding: 2px 5px;
+                margin: 0px;
+                border: none;
+                height: 18px;
+                min-height: 18px;
+            }
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #e9ecef;
+                color: #212121;
             }
         """)
 

@@ -154,23 +154,17 @@ class RPMApp(QMainWindow):
 
             status_text = "NORMAL" if spo2 >= SPO2_THRESHOLD else "LOW"
             status_item = QTableWidgetItem(status_text)
+            status_item.setFont(QFont("", -1, QFont.Bold))
 
-            # Set color based on status - with better contrast
+            # Set color based on status
             if status_text == "NORMAL":
-                status_item = QTableWidgetItem(status_text)
-                status_item.setFont(QFont("", -1, QFont.Bold))
-                self.table.setItem(row_position, 2, status_item)
-                self.table.item(row_position, 2).setBackground(QColor("#e8f5e9"))
-                self.table.item(row_position, 2).setForeground(QColor("#2e7d32"))
+                status_item.setBackground(QColor("#e8f5e9"))
+                status_item.setForeground(QColor("#2e7d32"))
+            else:
+                status_item.setBackground(QColor("#ffebee"))
+                status_item.setForeground(QColor("#d32f2f"))
 
-            elif status_text == "LOW":
-                status_item = QTableWidgetItem(status_text)
-                status_item.setFont(QFont("", -1, QFont.Bold))
-                self.table.setItem(row_position, 2, status_item)
-                self.table.item(row_position, 2).setBackground(QColor("#ffebee"))
-                self.table.item(row_position, 2).setForeground(QColor("#d32f2f"))
-
-            # Add to table
+            # Add to table → jetzt NUR EINMAL setzen
             self.table.setItem(row_position, 0, time_item)
             self.table.setItem(row_position, 1, spo2_item)
             self.table.setItem(row_position, 2, status_item)

@@ -4,7 +4,7 @@ Main window for the Remote Patient Monitoring application
 
 from datetime import datetime
 
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QMessageBox, QStatusBar
 

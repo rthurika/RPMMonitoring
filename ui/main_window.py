@@ -147,7 +147,6 @@ class RPMApp(QMainWindow):
             time_item = QTableWidgetItem(formatted_time)
             spo2_item = QTableWidgetItem(str(spo2))
 
-
             status_text = "NORMAL" if spo2 >= SPO2_THRESHOLD else "LOW"
             status_item = QTableWidgetItem(status_text)
 

@@ -108,6 +108,7 @@ def get_application_styles():
         }
     """
 
+
 modern_light_theme = {
     "background": "#FAFAFA",
     "text": "#212121",

@@ -3,6 +3,7 @@ API client for the Remote Patient Monitoring application
 """
 
 import requests
+
 from config import BASE_URL
 
 

@@ -4,7 +4,7 @@ Main window for the Remote Patient Monitoring application
 
 from datetime import datetime
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QMessageBox, QStatusBar
 
@@ -130,6 +130,12 @@ class RPMApp(QMainWindow):
 
     def update_table(self):
         """Update the SpO2 readings table"""
+        self.table.setStyleSheet("""
+            QTableWidget::item {
+                background-color: transparent !important;
+                border: none;
+            }
+        """)
         self.table.setRowCount(0)
 
         for measurement in self.measurements:
@@ -138,7 +144,6 @@ class RPMApp(QMainWindow):
 
             row_position = self.table.rowCount()
             self.table.insertRow(row_position)
-            self.table.setAlternatingRowColors(True)
 
             # Format time
             dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
@@ -152,20 +157,18 @@ class RPMApp(QMainWindow):
 
             # Set color based on status - with better contrast
             if status_text == "NORMAL":
-                print("OK")
-                status_item.setBackground(QColor("#ffebee"))  # light red background
-                status_item.setForeground(QColor("#d32f2f"))
-                bold_font = QFont()
-                bold_font.setBold(True)
-                status_item.setFont(bold_font)
+                status_item = QTableWidgetItem(status_text)
+                status_item.setFont(QFont("", -1, QFont.Bold))
+                self.table.setItem(row_position, 2, status_item)
+                self.table.item(row_position, 2).setBackground(QColor("#e8f5e9"))
+                self.table.item(row_position, 2).setForeground(QColor("#2e7d32"))
 
             elif status_text == "LOW":
-
-                status_item.setBackground(QColor("#e8f5e9"))
-                status_item.setForeground(QColor("#2e7d32"))
-                bold_font = QFont()
-                bold_font.setBold(True)
-                status_item.setFont(bold_font)
+                status_item = QTableWidgetItem(status_text)
+                status_item.setFont(QFont("", -1, QFont.Bold))
+                self.table.setItem(row_position, 2, status_item)
+                self.table.item(row_position, 2).setBackground(QColor("#ffebee"))
+                self.table.item(row_position, 2).setForeground(QColor("#d32f2f"))
 
             # Add to table
             self.table.setItem(row_position, 0, time_item)
@@ -174,6 +177,7 @@ class RPMApp(QMainWindow):
 
         self.table.resizeColumnsToContents()
         self.table.setColumnWidth(0, max(150, self.table.columnWidth(0)))
+        self.table.repaint()
 
     def update_status(self):
         """Update the overall patient status display"""

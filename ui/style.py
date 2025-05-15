@@ -69,8 +69,8 @@ def get_application_styles():
         }
         QTableWidget::item {
             padding: 5px;
-            color: #1a1a1a;
-            border: none;  /* Remove borders around cells */
+            border: none;
+            background-color: inherit !important;
         }
         QHeaderView::section {
             background-color: #f8f9fa;

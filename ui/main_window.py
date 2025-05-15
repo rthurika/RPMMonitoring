@@ -4,13 +4,12 @@ Main window for the Remote Patient Monitoring application
 
 from datetime import datetime
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QMessageBox, QStatusBar
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QColor, QFont
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem, QMessageBox, QStatusBar
 
-
-from config import SPO2_THRESHOLD
 from api.patient_data import fetch_patient_data, send_patient_message
+from config import SPO2_THRESHOLD
 from ui.components import UIComponents
 from ui.style import get_application_styles, button_style
 
@@ -29,7 +28,6 @@ class RPMApp(QMainWindow):
         self.measurements = []
         self.status = "Unknown"
 
-        # Set application style
         self.setStyleSheet(get_application_styles())
 
         # Set up the main layout
@@ -82,6 +80,9 @@ class RPMApp(QMainWindow):
 
             self.current_patient = patient_id
             self.refresh_button.setEnabled(False)
+            self.refresh_button.setText("Loading...")
+            self.status_bar.showMessage("Fetching data...")
+            self.patient_info.setText(f"Loading data for Patient {patient_id}...")
 
             data = fetch_patient_data(patient_id)
             self.measurements = data.get("measurements", [])
@@ -89,7 +90,7 @@ class RPMApp(QMainWindow):
             # Update patient info display
             if self.measurements:
                 self.patient_info.setText(
-                    f"Patient {patient_id} "
+                    f"Patient {patient_id}"
                 )
             else:
                 self.patient_info.setText(f"Patient {patient_id} - No data available")
@@ -115,6 +116,7 @@ class RPMApp(QMainWindow):
             self.refresh_button.setText("Refresh")
             self.refresh_button.setEnabled(True)
             self.status_bar.showMessage(f"Error fetching data: {str(e)}")
+            patient_id = self.combobox_patient.currentData()
             self.patient_info.setText(f"Error loading data for Patient {patient_id}")
             self.patient_info.setStyleSheet("""
                 background-color: #ffebee;
@@ -136,41 +138,32 @@ class RPMApp(QMainWindow):
 
             row_position = self.table.rowCount()
             self.table.insertRow(row_position)
+            self.table.setAlternatingRowColors(True)
 
             # Format time
             dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             formatted_time = dt.strftime("%H:%M, %d %b")
 
-            # Create items
             time_item = QTableWidgetItem(formatted_time)
             spo2_item = QTableWidgetItem(str(spo2))
+
 
             status_text = "NORMAL" if spo2 >= SPO2_THRESHOLD else "LOW"
             status_item = QTableWidgetItem(status_text)
 
-            # Set alignment
-            time_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            spo2_item.setTextAlignment(Qt.AlignCenter)
-            status_item.setTextAlignment(Qt.AlignCenter)
             # Set color based on status - with better contrast
-            if spo2 < SPO2_THRESHOLD:
-                # For low values - use background color instead of just text color
-                status_item.setBackground(QColor("#ffebee"))  # Light red background
-                status_item.setForeground(QColor("#d32f2f"))  # Dark red text
-                spo2_item.setBackground(QColor("#ffebee"))  # Light red background
-                spo2_item.setForeground(QColor("#d32f2f"))  # Dark red text
-
-                # Make text bold
+            if status_text == "NORMAL":
+                print("OK")
+                status_item.setBackground(QColor("#ffebee"))  # light red background
+                status_item.setForeground(QColor("#d32f2f"))
                 bold_font = QFont()
                 bold_font.setBold(True)
                 status_item.setFont(bold_font)
-                spo2_item.setFont(bold_font)
-            else:
-                # For normal values - use background color instead of just text color
-                status_item.setBackground(QColor("#e8f5e9"))  # Light green background
-                status_item.setForeground(QColor("#2e7d32"))  # Dark green text
 
-                # Make text bold
+            elif status_text == "LOW":
+
+                status_item.setBackground(QColor("#e8f5e9"))
+                status_item.setForeground(QColor("#2e7d32"))
                 bold_font = QFont()
                 bold_font.setBold(True)
                 status_item.setFont(bold_font)
@@ -210,7 +203,6 @@ class RPMApp(QMainWindow):
         if low_reading:
             self.status = "Warning"
             self.status_label.setText("WARNING")
-            # Better contrast for warning status
             self.status_label.setStyleSheet("""
                 color: #721c24;
                 background-color: #f8d7da;
@@ -273,7 +265,6 @@ class RPMApp(QMainWindow):
             result = send_patient_message(self.current_patient, message)
 
             if result.get("stored", False):
-                # Success message with modern styling and better contrast
                 msg = UIComponents.create_message_box(
                     self,
                     "Success",
@@ -285,7 +276,7 @@ class RPMApp(QMainWindow):
                 self.message_text.clear()
                 self.status_bar.showMessage("Message sent successfully")
             else:
-                # Error message with better styling
+
                 msg = UIComponents.create_message_box(
                     self,
                     "Warning",
@@ -300,7 +291,6 @@ class RPMApp(QMainWindow):
             self.send_button.setEnabled(True)
 
         except Exception as e:
-            # Error message with better styling
             msg = UIComponents.create_message_box(
                 self,
                 "Error",

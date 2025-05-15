@@ -4,7 +4,6 @@ Main entry point
 """
 import sys
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFont, QFontDatabase
 from ui.main_window import RPMApp
 
 def main():

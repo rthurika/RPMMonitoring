@@ -4,9 +4,11 @@ UI components for the Remote Patient Monitoring application
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox,
-                               QPushButton, QLabel, QTableWidget, QTextEdit, QGroupBox, QFrame, QMessageBox)
-from PySide6.QtWidgets import QTableWidget, QAbstractItemView
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QComboBox,
+    QPushButton, QLabel, QTextEdit, QGroupBox, QFrame,
+    QMessageBox, QTableWidget, QAbstractItemView
+)
 
 from config import VALID_PATIENTS, SPO2_THRESHOLD
 
@@ -18,14 +20,10 @@ class UIComponents:
 
     @staticmethod
     def setup_header(parent):
-        """
-        Set up the header section with title and patient selection
-        """
         header_widget = QWidget()
         header_layout = QHBoxLayout(header_widget)
         header_layout.setContentsMargins(0, 0, 0, 15)
 
-        # Title and subtitle
         title_area = QWidget()
         title_layout = QVBoxLayout(title_area)
         title_layout.setContentsMargins(0, 0, 0, 0)
@@ -47,7 +45,6 @@ class UIComponents:
         title_layout.addWidget(title_label)
         title_layout.addWidget(subtitle_label)
 
-        # Patient selection area with visual distinction
         selection_area = QWidget()
         selection_area.setStyleSheet("""
             QWidget {
@@ -67,27 +64,43 @@ class UIComponents:
         patient_label.setFont(font)
 
         parent.combobox_patient = QComboBox()
+        parent.combobox_patient.setCursor(Qt.PointingHandCursor)
         parent.combobox_patient.setStyleSheet("""
             QComboBox {
                 border: 1px solid #ced4da;
                 border-radius: 4px;
-                padding: 5px;
+                padding: 5px 30px 5px 10px;
                 background-color: white;
                 color: #1a1a1a;
                 min-width: 150px;
             }
             QComboBox::drop-down {
-                border: none;
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
                 width: 24px;
+                border-left: 1px solid #ced4da;
+            }
+            QComboBox QAbstractItemView {
+                border: 1px solid #ced4da;
+                selection-background-color: #e9ecef;
+                selection-color: #212121;
+                background-color: white;
+                font-size: 13px;
             }
         """)
-        for patient_id in VALID_PATIENTS:
-            parent.combobox_patient.addItem(f"Patient {patient_id}", patient_id)
+
+        for patient_id in sorted(VALID_PATIENTS):
+            parent.combobox_patient.addItem(f"Patient {patient_id}", userData=patient_id)
+
+        if parent.combobox_patient.count() > 0:
+            parent.combobox_patient.setCurrentIndex(0)
+            parent.current_patient = parent.combobox_patient.currentData()
+
         parent.combobox_patient.currentIndexChanged.connect(parent.on_patient_changed)
 
-        # Refresh button with icon-like appearance
         parent.refresh_button = QPushButton("Refresh")
         parent.refresh_button.setFixedWidth(100)
+        parent.refresh_button.setCursor(Qt.PointingHandCursor)
         parent.refresh_button.setStyleSheet("""
             QPushButton {
                 background-color: #0d6efd;
@@ -114,7 +127,6 @@ class UIComponents:
         header_layout.addWidget(title_area, 1)
         header_layout.addWidget(selection_area)
 
-        # Add separator with shadow effect for visual depth
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
         separator.setFrameShadow(QFrame.Sunken)
@@ -131,15 +143,12 @@ class UIComponents:
 
     @staticmethod
     def setup_data_view(parent):
-        """
-        Set up the data view area with patient info and data table
-        """
         data_widget = QWidget()
         data_layout = QVBoxLayout(data_widget)
         data_layout.setContentsMargins(0, 0, 0, 0)
         data_layout.setSpacing(10)
 
-        # Patient info display
+        parent.patient_info = QLabel("Loading patient data...")
         parent.patient_info.setStyleSheet("""
             background-color: #e8f4ff;
             padding: 10px;
@@ -151,7 +160,6 @@ class UIComponents:
         parent.patient_info.setAlignment(Qt.AlignCenter)
         data_layout.addWidget(parent.patient_info)
 
-        # Table view
         parent.table_group = QGroupBox("SpO2 Readings")
         table_layout = QVBoxLayout(parent.table_group)
         table_layout.setContentsMargins(15, 20, 15, 15)
@@ -161,11 +169,9 @@ class UIComponents:
         parent.table.horizontalHeader().setStretchLastSection(True)
         parent.table.verticalHeader().setVisible(False)
 
-        # Disable selection to make it clear the table isn't interactive
-        parent.table.setSelectionMode(QTableWidget.NoSelection)
+        parent.table.setSelectionMode(QAbstractItemView.NoSelection)  # ✅ fixed
         parent.table.setEditTriggers(QTableWidget.NoEditTriggers)
-
-        parent.table.setAlternatingRowColors(True)
+        parent.table.setAlternatingRowColors(False)  # ✅ fixes macOS coloring issue
         parent.table.setShowGrid(False)
 
         table_layout.addWidget(parent.table)
@@ -177,21 +183,11 @@ class UIComponents:
 
     @staticmethod
     def setup_status_message_view(parent):
-        """
-        Set up the status and message area
-
-        Args:
-            parent: The main window instance
-
-        Returns:
-            QWidget: The status widget
-        """
         status_widget = QWidget()
         status_layout = QVBoxLayout(status_widget)
         status_layout.setContentsMargins(0, 0, 0, 0)
         status_layout.setSpacing(15)
 
-        # Overall status
         parent.status_group = QGroupBox("Patient Status")
         status_group_layout = QVBoxLayout(parent.status_group)
         status_group_layout.setContentsMargins(15, 20, 15, 15)
@@ -206,7 +202,6 @@ class UIComponents:
         status_group_layout.addWidget(parent.status_label)
         status_layout.addWidget(parent.status_group)
 
-        # Message area
         parent.message_group = QGroupBox("Clinical Advice")
         message_layout = QVBoxLayout(parent.message_group)
         message_layout.setContentsMargins(15, 20, 15, 15)
@@ -222,6 +217,7 @@ class UIComponents:
         parent.message_text.setEnabled(False)
 
         parent.send_button = QPushButton("Send Advice")
+        parent.send_button.setCursor(Qt.PointingHandCursor)
         parent.send_button.clicked.connect(parent.send_message)
         parent.send_button.setEnabled(False)
 
@@ -238,27 +234,13 @@ class UIComponents:
 
     @staticmethod
     def create_message_box(parent, title, text, info_text, icon_type=QMessageBox.Icon.Information):
-        """
-        Create a styled message box
-
-        Args:
-            parent: The parent widget
-            title: Message box title
-            text: Main message text
-            info_text: Informational text
-            icon_type: Message box icon type
-
-        Returns:
-            QMessageBox: The configured message box
-        """
         msg = QMessageBox(parent)
         msg.setWindowTitle(title)
         msg.setText(text)
         msg.setInformativeText(info_text)
         msg.setIcon(icon_type)
 
-        # Apply styling based on message type
-        if icon_type == QMessageBox.Icon.Critical or icon_type == QMessageBox.Icon.Warning:
+        if icon_type in [QMessageBox.Icon.Critical, QMessageBox.Icon.Warning]:
             button_style = """
                 background-color: #1a1a1a;
                 color: white;

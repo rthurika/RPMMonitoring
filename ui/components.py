@@ -169,10 +169,11 @@ class UIComponents:
         parent.table.horizontalHeader().setStretchLastSection(True)
         parent.table.verticalHeader().setVisible(False)
 
-        parent.table.setSelectionMode(QAbstractItemView.NoSelection)  # ✅ fixed
+        parent.table.setSelectionMode(QAbstractItemView.NoSelection)
         parent.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        parent.table.setAlternatingRowColors(False)  # ✅ fixes macOS coloring issue
+        parent.table.setAlternatingRowColors(False)
         parent.table.setShowGrid(False)
+        parent.table.setFocusPolicy(Qt.NoFocus)
 
         table_layout.addWidget(parent.table)
         data_layout.addWidget(parent.table_group)
